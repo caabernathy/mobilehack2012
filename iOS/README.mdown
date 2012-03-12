@@ -1,0 +1,486 @@
+**Mobila Hack iOS Demo**
+========================
+
+This README will guide you through the Mobile Hack iOS app demo. The iOS app package contains the initial app and the completed app. The initial app is your starting point for the demo steps. You can use the completed app as a reference if you run into any issues.
+
+This README will walk you through the following:
+
+* Getting Started
+* Creating your Facebook app
+* Installing the iOS app
+* Stepping through the demo
+
+**Getting Started**
+===================
+
+Your install package should have the following files:
+
+* MobileHack iOS Project (iOS)
+  * Xcode project containing the initial app
+
+* MobileHackComplete iOS Project (iOS)
+  * Xcode project containing the completed app
+
+To get the sample code do the following:
+
+* Install [Git](http://git-scm.com/).
+
+* Pull the samples package from GitHub:
+
+    git clone git://github.com/caabernathy/mobilehack2012/iOS
+
+**Creating your Facebook app**
+==============================
+
+First set up a Facebook app using the Developer app:
+
+* Create a new [Facebook app](https://developers.facebook.com/apps)
+* Enter the `App Namespace` when creating your app. You can choose a simple string to identify your app, such as ''mobilehack'', but it must be unique.
+
+**Installing the iOS app**
+==========================
+
+**Configuring the app**
+
+1. Using Xcode open up MobileHackComplete/MobileHack.xcodeproj - the completed project.
+
+2. Set up the Facebook iOS SDK:
+   1. Get the latest Facebook iOS SDK from GitHub: git clone git://github.com/facebook/facebook-ios-sdk.git
+   1. You should see a folder called facebook-ios-sdk/src that contains the SDK
+   1. Drag the src folder to the MobileHack project. You may choose to copy the items over into your project.
+   1. You may optionally delete the facebook-ios-sdk.xcodeproj and facebook_ios_sdk_Prefix.pch from the Xcode project. Delete the references if asked.
+
+3. Set up your App ID:
+   1. Open up AppDelegate.m, add your app ID by replacing "YOUR_APP_ID" with your app ID:
+
+             static NSString *kAppId = @"YOUR_APP_ID";
+
+   1. Open up MobileHack/Supporting Files/MobileHack-Info.plist
+   1. Navigate to URL types > Item 0 > URL Schemes > Item 0
+   1. Replace fbYOUR_APP_ID with "fb" followed by your app ID, e.g. fb123456 if your app ID is 123456
+
+4. Repeat steps (1) and (2) for the MobileHack/MobileHack.xcodeproj Xcode project - the demo starting project.
+
+
+**Stepping through the demo**
+=============================================================================
+
+1. Using Xcode open up MobileHack/MobileHack.xcodeproj
+
+**Add Facebook Authentication**
+
+App Delegate Header ….
+
+2. Import the Facebook library headers and add to the app delegate
+
+             #import "FBConnect.h"
+
+3. Add a property definition for Facebook
+
+             @property (nonatomic, retain) Facebook *facebook;
+
+
+App Delegate Implementation File …
+
+1. Add a reference to the Facebook app ID, use your app ID for the "YOUR_APP_ID" parameter below.
+
+             static NSString *kAppId = @"YOUR_APP_ID";
+
+
+2. Synthesize the Facebook property
+
+             @synthesize facebook;
+
+3. Release the _facebook_ property in the dealloc method
+
+             [facebook release];
+
+
+4. Initialize Facebook instance in the application:didFinishLaunchingWithOptions: method just before the end of the method.
+
+             facebook = [[Facebook alloc] initWithAppId:kAppId andDelegate:self];
+             return YES;
+
+
+App Delegate Header File ...
+
+1. Add to header that this class will conform to the Facebook session delegate handler
+
+             FBSessionDelegate
+
+2. Declare methods that will be called when the login or logout is clicked
+
+             - (void) login;
+             - (void) logout;
+
+
+App Delegate Implementation File …
+
+1. Implement the login and logout SDK calls
+
+             - (void) login {
+                 [facebook authorize:nil];
+             }
+
+             - (void) logout {
+                 [facebook logout];
+             }
+
+View Controller Implementation File …
+
+1. Import the App Delegate header
+
+             #import "AppDelegate.h"
+
+
+2. Modify the authButtonClicked: method to check the Facebook session to decide whether to call the app delegate's login or logout method.
+
+             - (IBAction)authButtonClicked:(id)sender {
+                 AppDelegate *delegate = (AppDelegate *) [[UIApplication sharedApplication] delegate];
+                 if ([[delegate facebook] isSessionValid]) {
+                     [delegate logout];
+                 } else {
+                     [delegate login];
+                 }
+             }
+
+
+
+App Delegate Implementation ...
+
+1. Set up the entry point back into the app to make sure SSO works correctly
+
+             // Pre 4.2 support
+             - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+                 return [facebook handleOpenURL:url]; 
+             }
+
+             // For 4.2+ support
+             - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+               sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+                 return [facebook handleOpenURL:url]; 
+             }
+
+2. Add the session delegate method implementations (change button labels)
+
+
+             // Implement session delegate methods
+             - (void)fbDidLogin {
+                 self.viewController.welcomeLabel.text = @"Welcome ...";
+				 [self.viewController.authButton 
+				     setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LogoutNormal.png"] 
+				     forState:UIControlStateNormal];
+             }
+
+             - (void)fbDidLogout {
+                 self.viewController.welcomeLabel.text = @"Login to Continue";
+				 [self.viewController.authButton 
+				     setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LoginWithFacebookNormal.png"] 
+				     forState:UIControlStateNormal];
+             }
+
+             - (void)fbDidNotLogin:(BOOL)cancelled {
+             }
+
+             - (void)fbDidExtendToken:(NSString*)accessToken
+               expiresAt:(NSDate*)expiresAt {
+             }
+
+
+             - (void)fbSessionInvalidated {
+             }
+
+App Info Plist file ...
+
+1. Set up your App ID:
+   1. Add a new property, a URL types property
+   1. Open up URL types > Item 0
+   1. Change Item 0's child property to URL Schemes type
+   1. Navigate to URL types > Item 0 > URL Schemes > Item 0
+   1. Add the value for Item 0 to fbYOUR_APP_ID with "fb" followed by your app ID, e.g. fb123456 if your app ID is 123456
+
+
+**Add a Personal Touch**
+
+App Delegate Header File ...
+
+1. Add to header that this class will conform to the Facebook session delegate handler
+
+             FBRequestDelegate
+
+App Delegate Implementation ...
+
+
+1. Define the API call method to get a user's name information
+
+             - (void)apiGraphMe {
+    
+                 NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   @"name",  @"fields",
+                                   nil];
+                 [facebook requestWithGraphPath:@"me" andParams:params andDelegate:self];
+             }
+
+
+2. Define API call method and implement successful API callback handler
+
+             - (void)request:(FBRequest *)request didLoad:(id)result {
+                 if ([result isKindOfClass:[NSArray class]] && ([result count] > 0)) {
+                     result = [result objectAtIndex:0];
+                 }
+                 if ([result objectForKey:@"name"]) {
+                     self.viewController.welcomeLabel.text =
+                         [NSString stringWithFormat:@"Welcome %@",
+                             [result objectForKey:@"name"]];
+                 }
+             }
+
+3. Modify the Facebook sessions log in delegate handler to make the call to the API to get user info
+
+             // Implement session delegate methods
+             - (void)fbDidLogin {
+                 self.viewController.welcomeLabel.text = @"Welcome ...";
+		     [self.viewController.authButton 
+		         setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LogoutNormal.png"] 
+			 forState:UIControlStateNormal];
+    
+                 // Personalize
+                 [self apiGraphMe];
+             }
+
+
+**Single Sign-On Best Practices - Distribution**
+
+Dev App Settings …
+
+1. Edit your [Dev app](https://developers.facebook.com/apps) Basic Settings to add the [Native iOS App settings](https://developers.facebook.com/docs/mobile/ios/build/#linktoapp):
+  * Enter a value for the _iPhone App Store ID_. The value must correspond to any valid iTunes app ID.
+  * Enter "0" in the _iPad App Store ID_ setting 
+  * Enable the _Configured for iOS SSO_ setting
+
+
+**Single Sign-On Best Practices - Remove Interstitial SSO Screen**
+
+Dev App Settings …
+
+1. Edit your [Dev app](https://developers.facebook.com/apps) Basic Settings to add the [Native iOS App settings](https://developers.facebook.com/docs/mobile/ios/build/#linktoapp):
+  * Enter a _iOS Bundle ID_. This bundle ID needs to match the _Bundle identifier_ in the Xcode project.
+
+
+**Single Sign-On Best Practices - Store Sessions**
+
+App Delegate Implementation File …
+
+1. Modify the session delegate method implementations (store, clear, and refresh session info)
+
+
+             // Implement session delegate methods
+             - (void)fbDidLogin {
+                 self.viewController.welcomeLabel.text = @"Welcome ...";
+				 [self.viewController.authButton 
+				     setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LogoutNormal.png"] 
+				     forState:UIControlStateNormal];
+    
+                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                 [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
+                 [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
+                 [defaults synchronize];
+
+                 // Personalize
+                 [self apiGraphMe];
+
+             }
+
+             - (void)fbDidLogout {
+                 self.viewController.welcomeLabel.text = @"Login to Continue";
+				 [self.viewController.authButton 
+				     setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LoginWithFacebookNormal.png"] 
+				     forState:UIControlStateNormal];
+    
+                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                 [defaults removeObjectForKey:@"FBAccessTokenKey"];
+                 [defaults removeObjectForKey:@"FBExpirationDateKey"];
+                 [defaults synchronize];
+             }
+
+             - (void)fbDidExtendToken:(NSString*)accessToken
+               expiresAt:(NSDate*)expiresAt {
+                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                 [defaults setObject:accessToken forKey:@"FBAccessTokenKey"];
+                 [defaults setObject:expiresAt forKey:@"FBExpirationDateKey"];
+                 [defaults synchronize];
+             }
+
+
+2. When app first starts check session status and show logged in or logged out states, put this in code after Facebook instance initialized
+
+                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                 if ([defaults objectForKey:@"FBAccessTokenKey"] 
+                     && [defaults objectForKey:@"FBExpirationDateKey"]) {
+                     facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+                     facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+                 }
+                 if ([facebook isSessionValid]) {
+                     [self fbDidLogin];
+                 } else {
+                     [self fbDidLogout];
+                 }
+
+
+3. Try and extend the user's session when the app is activated
+
+                 - (void)applicationDidBecomeActive:(UIApplication *)application
+                 {
+                     [facebook extendAccessTokenIfNeeded];
+                 }
+
+
+**Deep Linking**
+
+App Delegate Header File ... 
+
+1. Add that the app delegate conforms to Facebook Dialog Delegate 
+
+             FBDialogDelegate
+
+2. Add method that View Controller will call to invoke the dialog
+
+             - (void) post;
+
+
+App Delegate Implementation File ... 
+
+1. Add method call
+
+             - (void) post {
+                 NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   @"I'm using the Mobile Hack iOS app", @"name",
+                                   @"Mobile Hack for iOS.", @"caption",
+                                   @"Check out Mobile Hack for iOS to learn how you can make your iOS apps social using Facebook Platform.", @"description",
+                                   @"http://www.tunedon.com/texto", @"link",
+                                   nil];
+    
+    
+                 [facebook dialog:@"feed" andParams:params andDelegate:self];
+             }
+
+2. Add successful feed handler
+
+             - (NSDictionary*)parseURLParams:(NSString *)query {
+             	NSArray *pairs = [query componentsSeparatedByString:@"&"];
+             	NSMutableDictionary *params = [[[NSMutableDictionary alloc] init] autorelease];
+             	for (NSString *pair in pairs) {
+             		NSArray *kv = [pair componentsSeparatedByString:@"="];
+             		NSString *val =
+                     [[kv objectAtIndex:1]
+                      stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+             		[params setObject:val forKey:[kv objectAtIndex:0]];
+             	}
+                return params;
+             }
+
+             - (void)dialogCompleteWithUrl:(NSURL *)url {
+                 if (![url query]) {
+                     NSLog(@"User canceled dialog or there was an error");
+                     return;
+                 }
+    
+                 NSDictionary *params = [self parseURLParams:[url query]];
+                 if ([params valueForKey:@"post_id"]) {
+                     // Successful feed posts will return a post_id parameter
+                     NSLog(@"Feed post ID: %@", [params valueForKey:@"post_id"]);
+                 }
+             }
+
+3. Show or hide the post button depending on if the user is logged out or logged in
+
+             - (void)fbDidLogin {
+                 self.viewController.welcomeLabel.text = @"Welcome ...";
+                 [self.viewController.authButton 
+                  setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LogoutNormal.png"] 
+                  forState:UIControlStateNormal];
+
+    
+                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                 [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
+                 [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
+                 [defaults synchronize];
+    
+                 // Personalize
+                 [self apiGraphMe];
+                 
+                 // Show the post button
+                 [self.viewController.postButton setHidden:NO];
+                 
+             }
+
+             - (void)fbDidLogout {
+                 self.viewController.welcomeLabel.text = @"Login to Continue";
+                 [self.viewController.authButton 
+                  setImage:[UIImage imageNamed:@"FBConnect.bundle/images/LoginWithFacebookNormal.png"] 
+                  forState:UIControlStateNormal];
+
+    
+                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                 [defaults removeObjectForKey:@"FBAccessTokenKey"];
+                 [defaults removeObjectForKey:@"FBExpirationDateKey"];
+                 [defaults synchronize];
+                 
+                 // Hide the post button
+                 [self.viewController.postButton setHidden:YES];
+             }
+
+View Controller Implementation File ... 
+
+1. Implement the "click" action handlers
+
+             - (IBAction)postButtonClicked:(id)sender {
+                 AppDelegate *delegate = (AppDelegate *) [[UIApplication sharedApplication] delegate];
+                 if ([[delegate facebook] isSessionValid]) {
+                     [delegate post];
+                 }
+             }
+
+             
+App Delegate Implementation File ... 
+
+
+1. Add a method that will be invoked when a URL is opened for a deep link
+
+             - (void) checkDeepLink: (NSURL *) url {
+                 // To check for a deep link, first parse the incoming URL
+                 // to look for a target_url parameter
+                 NSString *query = [url fragment];
+                 NSDictionary *params = [self parseURLParams:query];
+                 // Check if target URL exists
+                 NSString *targetURLString = [params valueForKey:@"target_url"];
+                 if (targetURLString) {
+                     UIAlertView *alert = [[UIAlertView alloc] 
+                              initWithTitle:@"Deep Link!" 
+                              message:[NSString stringWithFormat:@"Incoming: %@", targetURLString]
+                              delegate:nil 
+                              cancelButtonTitle:@"OK" 
+                              otherButtonTitles:nil, 
+                              nil];
+                     [alert show];
+                     [alert release];
+                 }
+             }
+
+2. Call the new method added in the app delegate methods that handle an incoming URL
+
+             // Pre 4.2 support
+             - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+                 [self checkDeepLink:url];
+                 return [facebook handleOpenURL:url]; 
+             }
+
+             // For 4.2+ support
+             - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+               sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+                 [self checkDeepLink:url];
+                 return [facebook handleOpenURL:url]; 
+             }
+
+
