@@ -22,7 +22,7 @@
 // See http://developers.facebook.com/apps
 // Also, your application must bind to the fb[app_id]:// URL
 // scheme (substitue [app_id] for your real Facebook app id).
-static NSString *kAppId = @"374038142615411";
+static NSString *kAppId = @"YOUR_APP_ID";
 
 @implementation AppDelegate
 

@@ -27,7 +27,7 @@ To get the sample code do the following:
 
 * Pull the samples package from GitHub:
 
-    git clone git://github.com/caabernathy/mobilehack2012/iOS
+             git clone git://github.com/caabernathy/mobilehack2012
 
 **Creating your Facebook app**
 ==============================
@@ -42,30 +42,30 @@ First set up a Facebook app using the Developer app:
 
 **Configuring the app**
 
-1. Using Xcode open up MobileHackComplete/MobileHack.xcodeproj - the completed project.
+1. Using Xcode open up MobileHackComplete/MobileHack.xcodeproj (the completed project).
 
 2. Set up the Facebook iOS SDK:
    1. Get the latest Facebook iOS SDK from GitHub: git clone git://github.com/facebook/facebook-ios-sdk.git
-   1. You should see a folder called facebook-ios-sdk/src that contains the SDK
-   1. Drag the src folder to the MobileHack project. You may choose to copy the items over into your project.
-   1. You may optionally delete the facebook-ios-sdk.xcodeproj and facebook_ios_sdk_Prefix.pch from the Xcode project. Delete the references if asked.
+   1. You should see a folder called _facebook-ios-sdk/src_ that contains the SDK
+   1. Drag the _src_ folder to the MobileHack project. You may choose to copy the items over into your project.
+   1. (Optional) Delete the facebook-ios-sdk.xcodeproj and facebook_ios_sdk_Prefix.pch from the Xcode project.
 
 3. Set up your App ID:
-   1. Open up AppDelegate.m, add your app ID by replacing "YOUR_APP_ID" with your app ID:
+   1. Open up AppDelegate.m and replace "YOUR_APP_ID" with your Facebook app ID:
 
              static NSString *kAppId = @"YOUR_APP_ID";
 
-   1. Open up MobileHack/Supporting Files/MobileHack-Info.plist
+   1. Open up Supporting Files/MobileHack-Info.plist
    1. Navigate to URL types > Item 0 > URL Schemes > Item 0
    1. Replace fbYOUR_APP_ID with "fb" followed by your app ID, e.g. fb123456 if your app ID is 123456
 
-4. Repeat steps (1) and (2) for the MobileHack/MobileHack.xcodeproj Xcode project - the demo starting project.
+4. Repeat steps (1) and (2) for the MobileHack/MobileHack.xcodeproj Xcode project (the initial demo project).
 
 
 **Stepping through the demo**
 =============================================================================
 
-1. Using Xcode open up MobileHack/MobileHack.xcodeproj
+Using Xcode open up MobileHack/MobileHack.xcodeproj (the initial demo project)
 
 **Add Facebook Authentication**
 
@@ -161,7 +161,7 @@ App Delegate Implementation ...
                  return [facebook handleOpenURL:url]; 
              }
 
-2. Add the session delegate method implementations (change button labels)
+2. Add the session delegate method implementations (change text and buttons)
 
 
              // Implement session delegate methods
@@ -195,7 +195,7 @@ App Info Plist file ...
 1. Set up your App ID:
    1. Add a new property, a URL types property
    1. Open up URL types > Item 0
-   1. Change Item 0's child property to URL Schemes type
+   1. Change Item 0's child property to a URL Schemes type
    1. Navigate to URL types > Item 0 > URL Schemes > Item 0
    1. Add the value for Item 0 to fbYOUR_APP_ID with "fb" followed by your app ID, e.g. fb123456 if your app ID is 123456
 
@@ -327,7 +327,7 @@ App Delegate Implementation File …
                  }
 
 
-3. Try and extend the user's session when the app is activated
+3. Extend the user's session when the app is activated
 
                  - (void)applicationDidBecomeActive:(UIApplication *)application
                  {
@@ -364,7 +364,7 @@ App Delegate Implementation File ...
                  [facebook dialog:@"feed" andParams:params andDelegate:self];
              }
 
-2. Add successful feed handler
+2. Add the success post feed handler
 
              - (NSDictionary*)parseURLParams:(NSString *)query {
              	NSArray *pairs = [query componentsSeparatedByString:@"&"];
@@ -433,7 +433,7 @@ App Delegate Implementation File ...
 
 View Controller Implementation File ... 
 
-1. Implement the "click" action handlers
+1. Implement the post button "click" action handler
 
              - (IBAction)postButtonClicked:(id)sender {
                  AppDelegate *delegate = (AppDelegate *) [[UIApplication sharedApplication] delegate];
@@ -446,7 +446,7 @@ View Controller Implementation File ...
 App Delegate Implementation File ... 
 
 
-1. Add a method that will be invoked when a URL is opened for a deep link
+1. Add a method that will be invoked when a URL is opened that will check for a deep link
 
              - (void) checkDeepLink: (NSURL *) url {
                  // To check for a deep link, first parse the incoming URL
